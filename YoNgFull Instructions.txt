@@ -1,0 +1,368 @@
+YEOMAN ANGULAR FULLSTACK:
+INSTRUCTIONS FOR DEPLOYMENT
+
+Including Error Resolutions
+
+https://github.com/angular-fullstack/generator-angular-fullstack
+
+OUTLINE
+
+1 PREREQUISITES
+1.1 npm Modules
+1.2 MongoDB
+1.2.1 Download and Install Mongo DB Community (Free) Edition on Windows
+1.2.2 Run MongoDB Community Edition
+1.2.3 Configure and Install MongoDB Community Edition as a Windows Service
+1.3 node-gyp
+1.4 Create a new folder for your project
+
+2 INSTALLATION
+2.1 Setting the Options, Scaffolding the Project, and Installing the npm Dependencies
+2.2 Warnings and Workarounds
+2.2.1 Mac OS-X Warnings
+2.2.2 Deprecated npm Packages to be (Re-)Installed with the --save or --save-dev Option
+2.2.3 npm Packages to be (Re-)Installed with the --global Option 
+2.2.4 Misc. Warnings
+
+3 RUNNING THE APP LOCALLY
+3.1 gulp serve
+3.2 Warnings and Errors
+3.2.1 babel-register, or babel-core/register
+3.2.2 Authentication File Warnings and Errors
+3.2.3 Misc. Warnings
+
+4 DEPLOYING TO HEROKU
+4.1 Getting Started with Heroku
+4.2 Create a New App in Heroku
+4.3 Angular-Fullstack Generator: Heroku
+
+5 TESTING
+5.1 Unit Tests
+5.2 End-to-End Tests
+5.3 Code Coverage Reports
+5.4 Debugging
+
+6 ADDITIONAL INFORMATION
+6.1 Angular Generators
+6.2 SCSS Injection
+6.3 Yeoman Configuration
+6.4 Environment (Hidden) Variables
+6.5 Project Structure
+6.5.1 Overview
+6.5.2 An Example Client Component, in client/app
+6.5.3 An Example Server Component, in server/api
+
+###
+
+1 PREREQUISITES
+
+1.1 npm Modules
+
+https://nodejs.org/en/download/current/
+
+Download Windows Installer (.msi) 64-bit for Current (Latest Features): v7.4.0 (includes npm 4.0.5).
+ 
+Make sure to include Path in installation, so can run node and npm from CMD (as Administrator).
+
+
+1.2 MongoDB
+ 
+https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
+
+
+1.2.1 Download and Install Mongo DB "Community Server" (Free) Edition on Windows
+ 
+https://www.mongodb.com/download-center?jmp=nav#community
+ 
+Current Stable Release (3.4.1)
+ 
+Version: Windows Server 2008 R2 64-bit and later, with SSL support x64
+ 
+mongodb-win32-x....msi
+ 
+"If you are running any edition of Windows Server 2008 R2 or Windows 7, please install a hotfix to resolve an issue with memory mapped files on Windows."
+ 
+https://support.microsoft.com/en-us/help/2731284/-33-dos-error-code-when-memory-memory-mapped-files-are-cleaned-by-using-the-flushviewoffile-function-in-windows-7-or-in-windows-server-2008-r2
+ 
+"These instructions assume that you have installed MongoDB to C:\Program Files\MongoDB\Server\3.2\." 
+
+
+1.2.2 Run MongoDB Community Edition
+ 
+"WARNING: Do not make mongod.exe visible on public networks without running in 'Secure Mode' with the auth setting. MongoDB is designed to be run in trusted environments, and the database does not enable 'Secure Mode' by default."
+ 
+Set up the MongoDB environment.
+ 
+Make a data directory, to store all data, with the default path:
+ 
+> md \data\db
+ 
+OR specify an alternate path (wrap the path in double-quotes if it includes any spaces) (and, of course, md the directory first):
+ 
+> "C:\Program Files\MongoDB\Server\3.4\bin\mongod.exe" --dbpath "c:\users\doug\documents\angularfullstack\mongodb\data4"
+
+Ctrl-C to stop. 
+
+To start MongoDB:
+ 
+> "C:\Program Files\MongoDB\Server\3.4\bin\mongod.exe"
+ 
+"The 'waiting for connections message' in the console output indicates that the mongod.exe process is running successfully."
+ 
+To connect to MongoDB through the mongo.exe shell, open another Command Prompt:
+ 
+> "C:\Program Files\MongoDB\Server\3.4\bin\mongo.exe" (but this fails, perhaps because of db path)
+ 
+"Before deploying MongoDB in a production environment, consider the Production Notes document."
+
+
+1.2.3 Configure and Install MongoDB Community Edition as a Windows Service
+ 
+"Execute the ... steps from the Administrator command prompt."
+
+"Create directories for your database and log files:"
+
+> mkdir c:\users\doug\documents\angularfullstack\mongodb\db
+ 
+> mkdir c:\users\doug\documents\angularfullstack\mongodb\log
+
+"Create a configuration file. The file must set systemLog.path. Include additional configuration options as appropriate."
+ 
+Ex. With Notepad, create mongod.cfg file as with this content:
+ 
+systemLog:
+    destination: file
+    path: c:\users\doug\documents\angularfullstack\mongodb\log\mongod.log
+storage:
+    dbPath: c:\users\doug\documents\angularfullstack\mongodb\db
+
+And then save it here (Permissions wouldn't allow me to save it directly here): C:\Program Files\MongoDB\Server\3.4\mongod.cfg 
+
+"Install the MongoDB service:"
+
+> "C:\Program Files\MongoDB\Server\3.4\bin\mongod.exe" --config "C:\Program Files\MongoDB\Server\3.4\mongod.cfg" --install
+
+Then start or stop the MongoDB service:
+ 
+> net start MongoDB
+ 
+> net stop MongoDB
+ 
+It can also be configured to start automatically.
+ 
+See also instructions to remove the service, if need be.
+
+
+1.3 node-gyp
+
+https://docs.npmjs.com/cli/npm
+ 
+"If one of the packages npm tries to install is a native node module and requires compiling of C++ Code, npm will use node-gyp for that task. For a Unix system, node-gyp needs Python, make and a buildchain like GCC. On Windows, Python and Microsoft Visual Studio C++ is needed."
+ 
+https://github.com/nodejs/node-gyp
+ 
+> npm install -g node-gyp
+ 
+> npm install --global --production windows-build-tools
+ 
+The latter command installs everything required, including the correct (older) version of Python. See ref link for other options.
+ 
+
+1.4 Create a new folder for your project
+
+Ex.:
+
+> md c:\users\doug\documents\angularfullstack\dedyongfull4
+
+
+###
+
+
+2 INSTALLATION
+
+https://github.com/angular-fullstack/generator-angular-fullstack
+
+2.1 Setting the Options, Scaffolding the Project, and Installing the npm Dependencies
+
+First, install global requirements:
+
+> npm install -g yo gulp-cli generator-angular-fullstack 
+
+On this system (Win 10 x64) that installation yields the following warning, which apparently can be ignored:
+
+npm WARN deprecated npmconf@2.1.2: this package has been reintegrated into npm and is now out of date with respect to npm
+
+Then, run Yeoman AngularFullstack, which is interactive, with questions to answer, to set options (I have accepted the default options, below, unless otherwise indicated; typically, use arrow keys to move between options):
+
+> yo angular-fullstack
+
+? May generator-angular-fullstack anonymously report usage statistics to improve the tool over time? (Y/n) y
+
+[graphic of Yeoman] "Welcome to Yeoman, ladies and gentlemen!"
+
+"Out of the box I create an AngularJS app with an Express server."
+ 
+# Client
+
+? What would you like to write scripts with?
+> Babel
+  Typescript
+
+? Would you like to use Flow type with Babel? (y/N) n
+
+? What would you like to write markup with?
+> HTML
+  Pug
+
+? What would you like to write stylesheets with?
+  CSS
+> Sass
+  Stylus
+  Less
+
+? What Angular router would you like to use?
+  ngRoute
+> uiRouter
+
+? Would you like to include Bootstrap? (Y/n) y
+
+? Would you like to include UI Bootstrap? (Y/n) y
+
+# Server
+
+? What would you like to use for data modeling? (Press <space> to select, <a> to toggle all, <i> to inverse selection)
+> (*) Mongoose (MongoDB)
+  ( ) Sequelize (MySQL, SQLite, MariaDB, PostgreSQL)
+
+? Would you scaffold out an authentication boilerplate? (Y/n) y
+
+? Would you like to include additional oAuth strategies? (Press <space> to select, <a> to toggle all, <i> to inverse selection)
+>( ) Google
+ ( ) Facebook
+ ( ) Twitter
+
+? Would you like to use socket.io? (Y/n) y
+
+# Project
+
+? What would you like to write tests with? (Use arrow keys)
+> Jasmine [not default]
+  Mocha + Chai + Sinon [default]
+
+Then ...
+ 
+You're using the fantastic NgComponent generator.
+
+Initializing yo-rc.json configuration.
+
+   create package.json
+   create .babelrc
+   ...
+
+... the entire project is scaffolded. However, on my system (Win 10 x64) the following Warnings and Errors are also generated. See below, in various categories, for resolutions (if any).
+
+
+2.2 Warnings and Workarounds
+
+See also npm WARN above, about npmconf@2.1.2, which apparently can be ignored.
+
+npm WARN deprecated isparta-instrumenter-loader@1.0.1: isparta-instrumenter-loader is deprecated. Please use isparta-loader instead
+
+npm WARN deprecate node-uuid@1.4.7: use uuid module instead
+
+npm WARN deprecated minimatch@2.0.10: Please update to minimatch 3.0.2 or higher to avoid a RegExp DoS issue
+
+npm WARN deprecated minimatch@0.2.14: Please update to minimatch 3.0.2 or higher to avoid a RegExp DoS issue
+
+npm WARN deprecated graceful-fs@1.2.3: graceful-fs v3.0.0 and before will fail on node releases >= v7.0. Please update to graceful-fs@^4.0.0 as soon as possible. Use 'npm ls graceful-fs' to find it in the tree.
+
+npm WARN deprecated to-iso-string@0.0.2: to-iso-string has been deprecated, use @segment/to-iso-string instead.
+
+npm WARN deprecated jade@0.26.3: Jade has been renamed to pug, please install the latest version of pug instead of jade
+
+npm WARN deprecated minimatch@0.3.0: Please update to minimatch 3.0.2 or higher to avoid a RegExp DoS issue
+
+...
+
+npm WARN prefer global coffee-script@1.10.0 should be installed with -g
+
+npm WARN prefer global node-gyp@3.5.0 should be installed with -g
+
+npm WARN prefer global node-inspector@0.12.8 should be installed with -g
+
+> iltorb@1.0.13 install C:\WINDOWS\system32\node_modules\iltorb
+> node-gyp rebuild
+
+C:\WINDOWS\system32\node_modules\iltorb>if not defined npm_config_node_gyp (node "C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin\\..\..\node_modules\node-gyp\bin\node-gyp.js" rebuild )  else (node "" rebuild )
+gyp: binding.gyp not found (cwd: C:\WINDOWS\system32\node_modules\iltorb) while trying to load binding.gyp
+gyp ERR! configure error
+gyp ERR! stack Error: `gyp` failed with exit code: 1
+gyp ERR! stack    at ChildProcess.onCpExit (C:\Program Files\nodejs\node_modules\npm\node_modules\node-gyp\lib\configure.js:305:16)
+gyp ERR! stack    at emitTwo (events.js:106:13)
+gyp ERR! stack    at ChildProcess.emit (events.js:191:7)
+gyp ERR! stack    at Process.ChildProccess._handle.onexit (internal/child_process.js:215:12)
+gyp ERR! System Windows_NT 10.0.14393
+gyp ERR! command "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\node_modules\\node-gyp\\bin\\node-gyp.js" "rebuild"
+gyp ERR! cwd C:\WINDOWS\system32\node_modules\iltorb
+gyp ERR! node -v v7.4.0
+gyp ERR! node-gyp -v v3.4.0
+gyp ERR! not ok
+
+...
+
+npm WARN optional SKIPPING OPTIONAL DEPENDENCY: fsevents@^1.0.0 (node_modules\chokidar\node_modules\fsevents):
+npm WARN notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for fsevents@1.0.17: wanted {"os":"darwin","arch":"any"} (current: {"os":"win32","arch":"x64"})
+npm WARN optional SKIPPING OPTIONAL DEPENDENCY: fsevents@^1.0.0 (node_modules\stylint\node_modules\chokidar\node_modules\fsevents):
+npm WARN notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for fsevents@1.0.17: wanted {"os":"darwin","arch":"any"} (current: {"os":"win32","arch":"x64"})
+npm ERR! Windows_NT 10.0.14393
+npm ERR! argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install"
+npm ERR! node v7.4.0
+npm ERR! npm  v4.0.5
+npm ERR! code ELIFECYCLE
+
+npm ERR! iltorb@1.0.13 install: `node-gyp rebuild`
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the iltorb@1.0.13 install script 'node-gyp rebuild'.
+npm ERR! Make sure you have the latest version of node.js and npm installed.
+npm ERR! If you do, this is most likely a problem with the iltorb package,
+npm ERR! not with npm itself.
+npm ERR! Tell the author that this fails on your system:
+npm ERR!     node-gyp rebuild
+npm ERR! You can get information on how to open an issue for this project with:
+npm ERR!    npm bugs iltorb
+npm ERR! Or if that isn't available, you can get their info via:
+npm ERR!    npm owner ls iltorb
+npm ERR! There is likely additional logging output above.
+
+npm ERR! Please include the following file with any support request:
+npm ERR!    C:\WINDOWS\system32\npm-debug.log
+
+
+
+2.2.1 Mac OS-X Warnings
+
+
+
+
+2.2.2 Deprecated npm Packages to be (Re-)Installed with the --save or --save-dev Option
+
+
+
+
+2.2.3 npm Packages to be (Re-)Installed with the --global Option 
+
+
+
+
+2.2.4 Misc. Warnings
+
+
+
+###
+
+
+
+
+
+
